@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Inventario - Equipos Informáticos</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1><i class="fas fa-server"></i> Sistema de Inventario de Equipos</h1>
+            <p>Gestión integral de almacenamiento de equipos informáticos</p>
+        </header>
+
+        <nav class="nav-tabs">
+            <button class="tab-btn active" onclick="cambiarTab('dashboard')">
+                <i class="fas fa-chart-line"></i> Dashboard
+            </button>
+            <button class="tab-btn" onclick="cambiarTab('equipos')">
+                <i class="fas fa-laptop"></i> Equipos
+            </button>
+            <button class="tab-btn" onclick="cambiarTab('marcas')">
+                <i class="fas fa-tags"></i> Marcas
+            </button>
+            <button class="tab-btn" onclick="cambiarTab('categorias')">
+                <i class="fas fa-list"></i> Categorías
+            </button>
+            <button class="tab-btn" onclick="cambiarTab('ubicaciones')">
+                <i class="fas fa-map-marker-alt"></i> Ubicaciones
+            </button>
+            <button class="tab-btn" onclick="cambiarTab('salidas')">
+                <i class="fas fa-sign-out-alt"></i> Salidas
+            </button>
+            <button class="tab-btn" onclick="cambiarTab('movimientos')">
+                <i class="fas fa-exchange-alt"></i> Movimientos
+            </button>
+            <button class="tab-btn" onclick="cambiarTab('reportes')">
+                <i class="fas fa-file-alt"></i> Reportes
+            </button>
+        </nav>
+
+        <main class="main-content">
+            <!-- Dashboard -->
+            <div id="dashboard" class="tab-content active">
+                <h2><i class="fas fa-chart-line"></i> Dashboard</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-laptop"></i></div>
+                        <div class="stat-content">
+                            <h3 id="totalEquipos">0</h3>
+                            <p>Total Equipos</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-plus-circle"></i></div>
+                        <div class="stat-content">
+                            <h3 id="equiposNuevos">0</h3>
+                            <p>Equipos Nuevos</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-recycle"></i></div>
+                        <div class="stat-content">
+                            <h3 id="equiposUsados">0</h3>
+                            <p>Equipos Usados</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                        <div class="stat-content">
+                            <h3 id="equiposBuenEstado">0</h3>
+                            <p>Buen Estado</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                        <div class="stat-content">
+                            <h3 id="equiposMalasCondiciones">0</h3>
+                            <p>Malas Condiciones</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-sign-out-alt"></i></div>
+                        <div class="stat-content">
+                            <h3 id="totalSalidas">0</h3>
+                            <p>Total Salidas</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <h3>Equipos por Tipo de Dispositivo</h3>
+                        <div id="chartTipoDispositivo" class="chart-container"></div>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Equipos por Ubicación</h3>
+                        <div id="chartUbicacion" class="chart-container"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Equipos -->
+            <div id="equipos" class="tab-content">
+                <div class="section-header">
+                    <h2><i class="fas fa-laptop"></i> Gestión de Equipos</h2>
+                    <button class="btn btn-primary" onclick="mostrarModalEquipo()">
+                        <i class="fas fa-plus"></i> Nuevo Equipo
+                    </button>
+                </div>
+
+                <!-- Filtros avanzados -->
+                <div class="filters-section">
+                    <h3>Filtros Avanzados</h3>
+                    <div class="filters-grid">
+                        <div class="filter-group">
+                            <label for="filtroMarca">Marca:</label>
+                            <select id="filtroMarca">
+                                <option value="">Todas las marcas</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="filtroCategoria">Categoría:</label>
+                            <select id="filtroCategoria">
+                                <option value="">Todas las categorías</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="filtroUbicacion">Ubicación:</label>
+                            <select id="filtroUbicacion">
+                                <option value="">Todas las ubicaciones</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="filtroUso">Uso:</label>
+                            <select id="filtroUso">
+                                <option value="">Todos</option>
+                                <option value="nuevo">Nuevo</option>
+                                <option value="usado">Usado</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="filtroEstado">Estado:</label>
+                            <select id="filtroEstado">
+                                <option value="">Todos</option>
+                                <option value="buen estado">Buen Estado</option>
+                                <option value="malas condiciones">Malas Condiciones</option>
+                                <option value="mantenimiento">Mantenimiento</option>
+                                <option value="retirado">Retirado</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="filtroTipoDispositivo">Tipo de Dispositivo:</label>
+                            <select id="filtroTipoDispositivo">
+                                <option value="">Todos</option>
+                                <option value="PC">PC</option>
+                                <option value="laptop">Laptop</option>
+                                <option value="monitor">Monitor</option>
+                                <option value="servidor">Servidor</option>
+                                <option value="periferico">Periférico</option>
+                            </select>
+                        </div>
+                        <div class="filter-actions">
+                            <button class="btn btn-secondary" onclick="aplicarFiltros()">
+                                <i class="fas fa-filter"></i> Aplicar Filtros
+                            </button>
+                            <button class="btn btn-outline" onclick="limpiarFiltros()">
+                                <i class="fas fa-times"></i> Limpiar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Búsqueda -->
+                <div class="search-section">
+                    <input type="text" id="busquedaEquipos" placeholder="Buscar equipos por código, nombre, marca, modelo..." class="search-input">
+                    <button class="btn btn-primary" onclick="buscarEquipos()">
+                        <i class="fas fa-search"></i> Buscar
+                    </button>
+                </div>
+
+                <!-- Tabla de equipos -->
+                <div class="table-container">
+                    <table id="tablaEquipos" class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Nombre</th>
+                                <th>Marca</th>
+                                <th>Modelo</th>
+                                <th>Tipo Dispositivo</th>
+                                <th>Categoría</th>
+                                <th>Ubicación</th>
+                                <th>Uso</th>
+                                <th>Estado</th>
+                                <th>Fecha Adquisición</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyEquipos"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Marcas -->
+            <div id="marcas" class="tab-content">
+                <div class="section-header">
+                    <h2><i class="fas fa-tags"></i> Gestión de Marcas</h2>
+                    <button class="btn btn-primary" onclick="mostrarModalMarca()">
+                        <i class="fas fa-plus"></i> Nueva Marca
+                    </button>
+                </div>
+                <div class="table-container">
+                    <table id="tablaMarcas" class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Descripción</th>
+                                <th>Estado</th>
+                                <th>Fecha Creación</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyMarcas"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Categorías -->
+            <div id="categorias" class="tab-content">
+                <div class="section-header">
+                    <h2><i class="fas fa-list"></i> Categorías de Equipos</h2>
+                    <button class="btn btn-primary" onclick="mostrarModalCategoria()">
+                        <i class="fas fa-plus"></i> Nueva Categoría
+                    </button>
+                </div>
+                <div class="table-container">
+                    <table id="tablaCategorias" class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Descripción</th>
+                                <th>Fecha Creación</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyCategorias"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Ubicaciones -->
+            <div id="ubicaciones" class="tab-content">
+                <div class="section-header">
+                    <h2><i class="fas fa-map-marker-alt"></i> Ubicaciones de Almacenamiento</h2>
+                    <button class="btn btn-primary" onclick="mostrarModalUbicacion()">
+                        <i class="fas fa-plus"></i> Nueva Ubicación
+                    </button>
+                </div>
+                <div class="table-container">
+                    <table id="tablaUbicaciones" class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Descripción</th>
+                                <th>Fecha Creación</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyUbicaciones"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Salidas de Equipos -->
+            <div id="salidas" class="tab-content">
+                <div class="section-header">
+                    <h2><i class="fas fa-sign-out-alt"></i> Registro de Salidas de Equipos</h2>
+                    <button class="btn btn-primary" onclick="mostrarModalSalida()">
+                        <i class="fas fa-plus"></i> Nueva Salida
+                    </button>
+                </div>
+                <div class="table-container">
+                    <table id="tablaSalidas" class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Equipo</th>
+                                <th>Marca</th>
+                                <th>Fecha Salida</th>
+                                <th>Motivo</th>
+                                <th>Destino</th>
+                                <th>Responsable</th>
+                                <th>Notas</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodySalidas"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Movimientos -->
+            <div id="movimientos" class="tab-content">
+                <div class="section-header">
+                    <h2><i class="fas fa-exchange-alt"></i> Historial de Movimientos</h2>
+                    <button class="btn btn-primary" onclick="mostrarModalMovimiento()">
+                        <i class="fas fa-plus"></i> Nuevo Movimiento
+                    </button>
+                </div>
+                <div class="table-container">
+                    <table id="tablaMovimientos" class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Equipo</th>
+                                <th>Tipo Movimiento</th>
+                                <th>Ubicación Origen</th>
+                                <th>Ubicación Destino</th>
+                                <th>Fecha</th>
+                                <th>Usuario</th>
+                                <th>Notas</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyMovimientos"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Reportes -->
+            <div id="reportes" class="tab-content">
+                <h2><i class="fas fa-file-alt"></i> Reportes del Inventario</h2>
+                <div class="reports-grid">
+                    <div class="report-card">
+                        <h3>Reporte por Categoría</h3>
+                        <div id="reporteCategoria" class="report-content"></div>
+                    </div>
+                    <div class="report-card">
+                        <h3>Reporte por Ubicación</h3>
+                        <div id="reporteUbicacion" class="report-content"></div>
+                    </div>
+                    <div class="report-card">
+                        <h3>Reporte por Estado</h3>
+                        <div id="reporteEstado" class="report-content"></div>
+                    </div>
+                    <div class="report-card">
+                        <h3>Reporte de Salidas</h3>
+                        <div id="reporteSalidas" class="report-content"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal para Equipos -->
+    <div id="modalEquipo" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="tituloModalEquipo">Nuevo Equipo</h3>
+                <span class="close" onclick="cerrarModal('modalEquipo')">&times;</span>
+            </div>
+            <form id="formEquipo" onsubmit="manejarSubmitEquipo(event)">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="codigo">Código *</label>
+                        <input type="text" id="codigo" name="codigo" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="nombre">Nombre *</label>
+                        <input type="text" id="nombre" name="nombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="marca_id">Marca *</label>
+                        <select id="marca_id" name="marca_id" required>
+                            <option value="">Seleccionar marca</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="modelo">Modelo</label>
+                        <input type="text" id="modelo" name="modelo">
+                    </div>
+                    <div class="form-group">
+                        <label for="serie">Número de Serie</label>
+                        <input type="text" id="serie" name="serie">
+                    </div>
+                    <div class="form-group">
+                        <label for="tipo_dispositivo">Tipo de Dispositivo *</label>
+                        <select id="tipo_dispositivo" name="tipo_dispositivo" required>
+                            <option value="">Seleccionar tipo</option>
+                            <option value="PC">PC</option>
+                            <option value="laptop">Laptop</option>
+                            <option value="monitor">Monitor</option>
+                            <option value="servidor">Servidor</option>
+                            <option value="periferico">Periférico</option>
+                            <option value="red">Equipo de Red</option>
+                            <option value="almacenamiento">Almacenamiento</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="categoria_id">Categoría *</label>
+                        <select id="categoria_id" name="categoria_id" required>
+                            <option value="">Seleccionar categoría</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="ubicacion_id">Ubicación *</label>
+                        <select id="ubicacion_id" name="ubicacion_id" required>
+                            <option value="">Seleccionar ubicación</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="uso">Uso *</label>
+                        <select id="uso" name="uso" required>
+                            <option value="nuevo">Nuevo</option>
+                            <option value="usado">Usado</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="estado">Estado *</label>
+                        <select id="estado" name="estado" required>
+                            <option value="buen estado">Buen Estado</option>
+                            <option value="malas condiciones">Malas Condiciones</option>
+                            <option value="mantenimiento">Mantenimiento</option>
+                            <option value="retirado">Retirado</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="fecha_adquisicion">Fecha de Adquisición</label>
+                        <input type="date" id="fecha_adquisicion" name="fecha_adquisicion">
+                    </div>
+                    <div class="form-group">
+                        <label for="proveedor">Proveedor</label>
+                        <input type="text" id="proveedor" name="proveedor">
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="notas">Notas</label>
+                        <textarea id="notas" name="notas" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-outline" onclick="cerrarModal('modalEquipo')">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para Marcas -->
+    <div id="modalMarca" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="tituloModalMarca">Nueva Marca</h3>
+                <span class="close" onclick="cerrarModal('modalMarca')">&times;</span>
+            </div>
+            <form id="formMarca" onsubmit="manejarSubmitMarca(event)">
+                <div class="form-group">
+                    <label for="nombreMarca">Nombre *</label>
+                    <input type="text" id="nombreMarca" name="nombre" required>
+                </div>
+                <div class="form-group">
+                    <label for="descripcionMarca">Descripción</label>
+                    <textarea id="descripcionMarca" name="descripcion" rows="3"></textarea>
+                </div>
+                <div class="form-group" id="obsoletoGroup" style="display: none;">
+                    <label>
+                        <input type="checkbox" id="obsoleto" name="obsoleto">
+                        Marca Obsoleta
+                    </label>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-outline" onclick="cerrarModal('modalMarca')">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para Categorías -->
+    <div id="modalCategoria" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="tituloModalCategoria">Nueva Categoría</h3>
+                <span class="close" onclick="cerrarModal('modalCategoria')">&times;</span>
+            </div>
+            <form id="formCategoria" onsubmit="manejarSubmitCategoria(event)">
+                <div class="form-group">
+                    <label for="nombreCategoria">Nombre *</label>
+                    <input type="text" id="nombreCategoria" name="nombre" required>
+                </div>
+                <div class="form-group">
+                    <label for="descripcionCategoria">Descripción</label>
+                    <textarea id="descripcionCategoria" name="descripcion" rows="3"></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-outline" onclick="cerrarModal('modalCategoria')">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para Ubicaciones -->
+    <div id="modalUbicacion" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="tituloModalUbicacion">Nueva Ubicación</h3>
+                <span class="close" onclick="cerrarModal('modalUbicacion')">&times;</span>
+            </div>
+            <form id="formUbicacion" onsubmit="manejarSubmitUbicacion(event)">
+                <div class="form-group">
+                    <label for="nombreUbicacion">Nombre *</label>
+                    <input type="text" id="nombreUbicacion" name="nombre" required>
+                </div>
+                <div class="form-group">
+                    <label for="descripcionUbicacion">Descripción</label>
+                    <textarea id="descripcionUbicacion" name="descripcion" rows="3"></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-outline" onclick="cerrarModal('modalUbicacion')">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para Salidas -->
+    <div id="modalSalida" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="tituloModalSalida">Nueva Salida de Equipo</h3>
+                <span class="close" onclick="cerrarModal('modalSalida')">&times;</span>
+            </div>
+            <form id="formSalida" onsubmit="manejarSubmitSalida(event)">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="equipo_id">Equipo *</label>
+                        <select id="equipo_id" name="equipo_id" required>
+                            <option value="">Seleccionar equipo</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="fecha_salida">Fecha de Salida *</label>
+                        <input type="date" id="fecha_salida" name="fecha_salida" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="motivo">Motivo *</label>
+                        <input type="text" id="motivo" name="motivo" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="destino">Destino</label>
+                        <input type="text" id="destino" name="destino">
+                    </div>
+                    <div class="form-group">
+                        <label for="responsable">Responsable</label>
+                        <input type="text" id="responsable" name="responsable">
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="notasSalida">Notas</label>
+                        <textarea id="notasSalida" name="notas" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-outline" onclick="cerrarModal('modalSalida')">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Registrar Salida</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para Movimientos -->
+    <div id="modalMovimiento" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="tituloModalMovimiento">Nuevo Movimiento</h3>
+                <span class="close" onclick="cerrarModal('modalMovimiento')">&times;</span>
+            </div>
+            <form id="formMovimiento" onsubmit="manejarSubmitMovimiento(event)">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="equipo_id_mov">Equipo *</label>
+                        <select id="equipo_id_mov" name="equipo_id" required>
+                            <option value="">Seleccionar equipo</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="tipo_movimiento">Tipo de Movimiento *</label>
+                        <select id="tipo_movimiento" name="tipo_movimiento" required>
+                            <option value="">Seleccionar tipo</option>
+                            <option value="Entrada">Entrada</option>
+                            <option value="Transferencia">Transferencia</option>
+                            <option value="Mantenimiento">Mantenimiento</option>
+                            <option value="Retiro">Retiro</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="ubicacion_origen_id">Ubicación Origen</label>
+                        <select id="ubicacion_origen_id" name="ubicacion_origen_id">
+                            <option value="">Sin origen</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="ubicacion_destino_id">Ubicación Destino</label>
+                        <select id="ubicacion_destino_id" name="ubicacion_destino_id">
+                            <option value="">Sin destino</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="usuario">Usuario</label>
+                        <input type="text" id="usuario" name="usuario">
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="notasMovimiento">Notas</label>
+                        <textarea id="notasMovimiento" name="notas" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-outline" onclick="cerrarModal('modalMovimiento')">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Registrar Movimiento</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
