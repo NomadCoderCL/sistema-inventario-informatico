@@ -273,6 +273,23 @@ Si tienes alguna pregunta o necesitas ayuda:
 - [ ] Logs de auditoría detallados
 
 ---
+Nuevos archivos creados:
+controllers/authController.js
+- Controlador para manejar el inicio de sesión y verificación de tokens.
+routes/authRoutes.js
+- Rutas para la autenticación.
+.gitignore
+- Archivo para excluir archivos sensibles del control de versiones.
+Cambios en el modelo de Usuario:
+
+-Se agregaron métodos para autenticación como 
+getByUsername
+ y verificación de contraseña.
+
+Próximos pasos pendientes:
+- Actualizar server.js para incluir las rutas de autenticación.
+Configurar variables de entorno para la clave secreta JWT.
+Implementar el frontend para el inicio de sesión.
 
 **¡Disfruta usando tu sistema de inventario! 🎉**
 

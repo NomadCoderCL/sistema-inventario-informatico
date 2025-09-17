@@ -1,7 +1,14 @@
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
+const bcrypt = require('bcryptjs');
 const dbPath = path.join(__dirname, 'inventario.db');
 const db = new sqlite3.Database(dbPath);
+
+// Función para hashear contraseñas
+const hashPassword = (password) => {
+    const salt = bcrypt.genSaltSync(10);
+    return bcrypt.hashSync(password, salt);
+};
 
 db.serialize(() => {
     // Tabla de categorías (tipos de equipo)
@@ -81,6 +88,56 @@ db.serialize(() => {
         FOREIGN KEY (ubicacion_destino_id) REFERENCES ubicaciones (id)
     )`);
 
+    // Tabla de roles de usuario
+    db.run(`CREATE TABLE IF NOT EXISTS roles (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nombre TEXT NOT NULL UNIQUE,
+        descripcion TEXT,
+        nivel_permiso INTEGER NOT NULL DEFAULT 1,
+        fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`);
+
+    // Tabla de usuarios
+    db.run(`CREATE TABLE IF NOT EXISTS usuarios (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT NOT NULL UNIQUE,
+        email TEXT UNIQUE,
+        password_hash TEXT NOT NULL,
+        nombre_completo TEXT,
+        rol_id INTEGER,
+        activo BOOLEAN DEFAULT 1,
+        ultimo_inicio_sesion DATETIME,
+        fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+        fecha_actualizacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (rol_id) REFERENCES roles (id)
+    )`);
+
+    // Tabla de tokens de refresco
+    db.run(`CREATE TABLE IF NOT EXISTS refresh_tokens (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        usuario_id INTEGER NOT NULL,
+        token TEXT NOT NULL UNIQUE,
+        expiracion DATETIME NOT NULL,
+        revocado BOOLEAN DEFAULT 0,
+        fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (usuario_id) REFERENCES usuarios (id)
+    )`);
+
+    // Tabla de logs de actividad
+    db.run(`CREATE TABLE IF NOT EXISTS logs_actividad (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        usuario_id INTEGER,
+        accion TEXT NOT NULL,
+        tabla_afectada TEXT,
+        registro_afectado_id INTEGER,
+        datos_anteriores TEXT,
+        datos_nuevos TEXT,
+        direccion_ip TEXT,
+        user_agent TEXT,
+        fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (usuario_id) REFERENCES usuarios (id)
+    )`);
+
     // Insertar datos de ejemplo
     db.run(`INSERT OR IGNORE INTO categorias (nombre, descripcion) VALUES 
         ('Computadoras', 'Equipos de cómputo completos'),
@@ -106,6 +163,18 @@ db.serialize(() => {
         ('Apple', 'Equipos Mac y dispositivos iOS'),
         ('ASUS', 'Placas base y laptops'),
         ('MSI', 'Gaming y equipos especializados')`);
+
+    // Insertar roles por defecto
+    db.run(`INSERT OR IGNORE INTO roles (id, nombre, descripcion, nivel_permiso) VALUES 
+        (1, 'Super Administrador', 'Acceso total al sistema', 100),
+        (2, 'Administrador', 'Administra el sistema con restricciones', 80),
+        (3, 'Técnico', 'Puede gestionar equipos y mantenimientos', 50),
+        (4, 'Usuario', 'Acceso básico de solo lectura', 10)`);
+
+    // Insertar usuario administrador por defecto (usuario: admin, contraseña: Admin123!)
+    const adminPassword = hashPassword('Admin123!');
+    db.run(`INSERT OR IGNORE INTO usuarios (id, username, email, password_hash, nombre_completo, rol_id) VALUES 
+        (1, 'admin', 'admin@inventario.local', '${adminPassword}', 'Administrador del Sistema', 1)`);
 
     db.run(`INSERT OR IGNORE INTO equipos (codigo, nombre, marca_id, modelo, serie, tipo_dispositivo, categoria_id, ubicacion_id, uso, estado, fecha_adquisicion, proveedor, notas) VALUES 
         ('PC001', 'PC Dell OptiPlex', 1, 'OptiPlex 7090', 'SN001', 'PC', 1, 1, 'nuevo', 'buen estado', '2024-01-15', 'Dell Directo', 'Equipo de oficina'),
