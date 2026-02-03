@@ -2,6 +2,9 @@ const express = require('express');
 const router = express.Router();
 const marcasController = require('../controllers/marcasController');
 const { validateMarca } = require('../middleware/validators');
+const { auth } = require('../middleware/auth');
+
+router.use(auth);
 
 router.get('/', (req, res) => marcasController.getAll(req, res));
 router.get('/todas', (req, res) => marcasController.getAllComplete(req, res));

@@ -7,12 +7,125 @@ let movimientos = [];
 let salidas = [];
 let equipoEditando = null;
 let marcaEditando = null;
+let currentUser = null;
+let authToken = localStorage.getItem('authToken');
 
 // Inicialización del sistema
-document.addEventListener('DOMContentLoaded', function() {
-    inicializarSistema();
+document.addEventListener('DOMContentLoaded', function () {
+    checkAuth();
     configurarEventos();
 });
+
+async function checkAuth() {
+    if (!authToken) {
+        showLogin();
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/auth/verify', {
+            headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            currentUser = result.data;
+            showApp();
+            inicializarSistema();
+        } else {
+            handleLogout();
+        }
+    } catch (error) {
+        console.error('Error al verificar sesión:', error);
+        handleLogout();
+    }
+}
+
+function showLogin() {
+    document.getElementById('login-container').style.display = 'flex';
+    document.getElementById('app-container').style.display = 'none';
+}
+
+function showApp() {
+    document.getElementById('login-container').style.display = 'none';
+    document.getElementById('app-container').style.display = 'block';
+    document.getElementById('display-user').textContent = `Bienvenido, ${currentUser.nombre_completo || currentUser.username}`;
+}
+
+async function handleLogin(event) {
+    event.preventDefault();
+    const username = document.getElementById('login-username').value;
+    const password = document.getElementById('login-password').value;
+    const errorDiv = document.getElementById('login-error');
+
+    errorDiv.style.display = 'none';
+
+    try {
+        const response = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            authToken = result.data.token;
+            currentUser = result.data.usuario;
+            localStorage.setItem('authToken', authToken);
+            showApp();
+            inicializarSistema();
+        } else {
+            errorDiv.textContent = result.message || 'Error al iniciar sesión';
+            errorDiv.style.display = 'block';
+        }
+    } catch (error) {
+        console.error('Error en login:', error);
+        errorDiv.textContent = 'Error de conexión con el servidor';
+        errorDiv.style.display = 'block';
+    }
+}
+
+function handleLogout() {
+    authToken = null;
+    currentUser = null;
+    localStorage.removeItem('authToken');
+    showLogin();
+}
+
+// Helper para fetch con token
+async function apiFetch(url, options = {}) {
+    if (!authToken) {
+        handleLogout();
+        throw new Error('No hay token de sesión');
+    }
+
+    const headers = {
+        'Authorization': `Bearer ${authToken}`,
+        'Content-Type': 'application/json',
+        ...options.headers
+    };
+
+    try {
+        const response = await fetch(url, { ...options, headers });
+
+        if (response.status === 401) {
+            handleLogout();
+            throw new Error('Sesión expirada');
+        }
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result.message || 'Error en la petición');
+        }
+
+        return result;
+    } catch (error) {
+        console.error(`Error en apiFetch (${url}):`, error);
+        throw error;
+    }
+}
 
 async function inicializarSistema() {
     try {
@@ -24,7 +137,7 @@ async function inicializarSistema() {
             cargarMovimientos(),
             cargarSalidas()
         ]);
-        
+
         cargarEstadisticas();
         configurarFiltros();
     } catch (error) {
@@ -35,7 +148,7 @@ async function inicializarSistema() {
 
 function configurarEventos() {
     // Evento de búsqueda en tiempo real
-    document.getElementById('busquedaEquipos').addEventListener('input', function(e) {
+    document.getElementById('busquedaEquipos').addEventListener('input', function (e) {
         if (e.target.value.length >= 3) {
             buscarEquipos(e.target.value);
         } else if (e.target.value.length === 0) {
@@ -50,20 +163,20 @@ function cambiarTab(tabId) {
     document.querySelectorAll('.tab-content').forEach(tab => {
         tab.classList.remove('active');
     });
-    
+
     // Desactivar todos los botones
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.classList.remove('active');
     });
-    
+
     // Mostrar tab seleccionado
     document.getElementById(tabId).classList.add('active');
-    
+
     // Activar botón correspondiente
     event.target.classList.add('active');
-    
+
     // Cargar datos específicos del tab si es necesario
-    switch(tabId) {
+    switch (tabId) {
         case 'dashboard':
             cargarEstadisticas();
             break;
@@ -94,11 +207,9 @@ function cambiarTab(tabId) {
 // ==================== EQUIPOS ====================
 async function cargarEquipos() {
     try {
-        const response = await fetch('/api/equipos');
-        equipos = await response.json();
+        equipos = await apiFetch('/api/equipos');
         renderizarTablaEquipos();
     } catch (error) {
-        console.error('Error al cargar equipos:', error);
         mostrarNotificacion('Error al cargar equipos', 'error');
     }
 }
@@ -106,7 +217,7 @@ async function cargarEquipos() {
 function renderizarTablaEquipos() {
     const tbody = document.getElementById('tbodyEquipos');
     tbody.innerHTML = '';
-    
+
     equipos.forEach(equipo => {
         const row = document.createElement('tr');
         row.innerHTML = `
@@ -135,11 +246,9 @@ function renderizarTablaEquipos() {
 
 async function buscarEquipos(termino) {
     try {
-        const response = await fetch(`/api/equipos/buscar/${termino}`);
-        equipos = await response.json();
+        equipos = await apiFetch(`/api/equipos/buscar/${termino}`);
         renderizarTablaEquipos();
     } catch (error) {
-        console.error('Error al buscar equipos:', error);
         mostrarNotificacion('Error al buscar equipos', 'error');
     }
 }
@@ -153,20 +262,18 @@ async function aplicarFiltros() {
         estado: document.getElementById('filtroEstado').value,
         tipo_dispositivo: document.getElementById('filtroTipoDispositivo').value
     };
-    
+
     // Filtrar valores vacíos
     const filtrosAplicados = Object.fromEntries(
         Object.entries(filtros).filter(([_, value]) => value !== '')
     );
-    
+
     try {
         const queryString = new URLSearchParams(filtrosAplicados).toString();
-        const response = await fetch(`/api/equipos/filtros?${queryString}`);
-        equipos = await response.json();
+        equipos = await apiFetch(`/api/equipos/filtros?${queryString}`);
         renderizarTablaEquipos();
         mostrarNotificacion('Filtros aplicados correctamente', 'success');
     } catch (error) {
-        console.error('Error al aplicar filtros:', error);
         mostrarNotificacion('Error al aplicar filtros', 'error');
     }
 }
@@ -187,7 +294,7 @@ function configurarFiltros() {
     const filtroMarca = document.getElementById('filtroMarca');
     const filtroCategoria = document.getElementById('filtroCategoria');
     const filtroUbicacion = document.getElementById('filtroUbicacion');
-    
+
     // Marca
     filtroMarca.innerHTML = '<option value="">Todas las marcas</option>';
     marcas.forEach(marca => {
@@ -198,7 +305,7 @@ function configurarFiltros() {
             filtroMarca.appendChild(option);
         }
     });
-    
+
     // Categoría
     filtroCategoria.innerHTML = '<option value="">Todas las categorías</option>';
     categorias.forEach(categoria => {
@@ -207,7 +314,7 @@ function configurarFiltros() {
         option.textContent = categoria.nombre;
         filtroCategoria.appendChild(option);
     });
-    
+
     // Ubicación
     filtroUbicacion.innerHTML = '<option value="">Todas las ubicaciones</option>';
     ubicaciones.forEach(ubicacion => {
@@ -222,7 +329,7 @@ function mostrarModalEquipo(equipo = null) {
     equipoEditando = equipo;
     const modal = document.getElementById('modalEquipo');
     const titulo = document.getElementById('tituloModalEquipo');
-    
+
     if (equipo) {
         titulo.textContent = 'Editar Equipo';
         llenarFormularioEquipo(equipo);
@@ -232,7 +339,7 @@ function mostrarModalEquipo(equipo = null) {
         // Establecer fecha actual por defecto
         document.getElementById('fecha_adquisicion').value = new Date().toISOString().split('T')[0];
     }
-    
+
     llenarSelectsEquipo();
     modal.style.display = 'block';
 }
@@ -265,7 +372,7 @@ function llenarSelectsEquipo() {
             selectMarca.appendChild(option);
         }
     });
-    
+
     // Llenar select de categorías
     const selectCategoria = document.getElementById('categoria_id');
     selectCategoria.innerHTML = '<option value="">Seleccionar categoría</option>';
@@ -275,7 +382,7 @@ function llenarSelectsEquipo() {
         option.textContent = categoria.nombre;
         selectCategoria.appendChild(option);
     });
-    
+
     // Llenar select de ubicaciones
     const selectUbicacion = document.getElementById('ubicacion_id');
     selectUbicacion.innerHTML = '<option value="">Seleccionar ubicación</option>';
@@ -289,7 +396,7 @@ function llenarSelectsEquipo() {
 
 async function manejarSubmitEquipo(event) {
     event.preventDefault();
-    
+
     const formData = new FormData(event.target);
     const datosEquipo = {
         codigo: formData.get('codigo'),
@@ -306,36 +413,28 @@ async function manejarSubmitEquipo(event) {
         proveedor: formData.get('proveedor'),
         notas: formData.get('notas')
     };
-    
+
     try {
-        let response;
         if (equipoEditando) {
-            response = await fetch(`/api/equipos/${equipoEditando.id}`, {
+            await apiFetch(`/api/equipos/${equipoEditando.id}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(datosEquipo)
             });
         } else {
-            response = await fetch('/api/equipos', {
+            await apiFetch('/api/equipos', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(datosEquipo)
             });
         }
-        
-        if (response.ok) {
-            mostrarNotificacion(
-                equipoEditando ? 'Equipo actualizado correctamente' : 'Equipo creado correctamente',
-                'success'
-            );
-            cerrarModal('modalEquipo');
-            cargarEquipos();
-            cargarEstadisticas();
-        } else {
-            throw new Error('Error en la respuesta del servidor');
-        }
+
+        mostrarNotificacion(
+            equipoEditando ? 'Equipo actualizado correctamente' : 'Equipo creado correctamente',
+            'success'
+        );
+        cerrarModal('modalEquipo');
+        cargarEquipos();
+        cargarEstadisticas();
     } catch (error) {
-        console.error('Error al guardar equipo:', error);
         mostrarNotificacion('Error al guardar equipo', 'error');
     }
 }
@@ -350,16 +449,11 @@ async function editarEquipo(id) {
 async function eliminarEquipo(id) {
     if (confirm('¿Estás seguro de que quieres eliminar este equipo?')) {
         try {
-            const response = await fetch(`/api/equipos/${id}`, { method: 'DELETE' });
-            if (response.ok) {
-                mostrarNotificacion('Equipo eliminado correctamente', 'success');
-                cargarEquipos();
-                cargarEstadisticas();
-            } else {
-                throw new Error('Error al eliminar equipo');
-            }
+            await apiFetch(`/api/equipos/${id}`, { method: 'DELETE' });
+            mostrarNotificacion('Equipo eliminado correctamente', 'success');
+            cargarEquipos();
+            cargarEstadisticas();
         } catch (error) {
-            console.error('Error al eliminar equipo:', error);
             mostrarNotificacion('Error al eliminar equipo', 'error');
         }
     }
@@ -368,11 +462,9 @@ async function eliminarEquipo(id) {
 // ==================== MARCAS ====================
 async function cargarMarcas() {
     try {
-        const response = await fetch('/api/marcas/todas');
-        marcas = await response.json();
+        marcas = await apiFetch('/api/marcas/todas');
         renderizarTablaMarcas();
     } catch (error) {
-        console.error('Error al cargar marcas:', error);
         mostrarNotificacion('Error al cargar marcas', 'error');
     }
 }
@@ -380,7 +472,7 @@ async function cargarMarcas() {
 function renderizarTablaMarcas() {
     const tbody = document.getElementById('tbodyMarcas');
     tbody.innerHTML = '';
-    
+
     marcas.forEach(marca => {
         const row = document.createElement('tr');
         row.innerHTML = `
@@ -410,7 +502,7 @@ function mostrarModalMarca(marca = null) {
     const modal = document.getElementById('modalMarca');
     const titulo = document.getElementById('tituloModalMarca');
     const obsoletoGroup = document.getElementById('obsoletoGroup');
-    
+
     if (marca) {
         titulo.textContent = 'Editar Marca';
         document.getElementById('nombreMarca').value = marca.nombre;
@@ -422,49 +514,41 @@ function mostrarModalMarca(marca = null) {
         document.getElementById('formMarca').reset();
         obsoletoGroup.style.display = 'none';
     }
-    
+
     modal.style.display = 'block';
 }
 
 async function manejarSubmitMarca(event) {
     event.preventDefault();
-    
+
     const formData = new FormData(event.target);
     const datosMarca = {
         nombre: formData.get('nombre'),
         descripcion: formData.get('descripcion'),
         obsoleto: marcaEditando ? formData.get('obsoleto') === 'on' : false
     };
-    
+
     try {
-        let response;
         if (marcaEditando) {
-            response = await fetch(`/api/marcas/${marcaEditando.id}`, {
+            await apiFetch(`/api/marcas/${marcaEditando.id}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(datosMarca)
             });
         } else {
-            response = await fetch('/api/marcas', {
+            await apiFetch('/api/marcas', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(datosMarca)
             });
         }
-        
-        if (response.ok) {
-            mostrarNotificacion(
-                marcaEditando ? 'Marca actualizada correctamente' : 'Marca creada correctamente',
-                'success'
-            );
-            cerrarModal('modalMarca');
-            cargarMarcas();
-            configurarFiltros();
-        } else {
-            throw new Error('Error en la respuesta del servidor');
-        }
+
+        mostrarNotificacion(
+            marcaEditando ? 'Marca actualizada correctamente' : 'Marca creada correctamente',
+            'success'
+        );
+        cerrarModal('modalMarca');
+        cargarMarcas();
+        configurarFiltros();
     } catch (error) {
-        console.error('Error al guardar marca:', error);
         mostrarNotificacion('Error al guardar marca', 'error');
     }
 }
@@ -490,7 +574,7 @@ async function toggleMarcaObsoleta(id, obsoleto) {
                     obsoleto: obsoleto
                 })
             });
-            
+
             if (response.ok) {
                 mostrarNotificacion(`Marca ${accion} correctamente`, 'success');
                 cargarMarcas();
@@ -508,11 +592,9 @@ async function toggleMarcaObsoleta(id, obsoleto) {
 // ==================== CATEGORÍAS ====================
 async function cargarCategorias() {
     try {
-        const response = await fetch('/api/categorias');
-        categorias = await response.json();
+        categorias = await apiFetch('/api/categorias');
         renderizarTablaCategorias();
     } catch (error) {
-        console.error('Error al cargar categorías:', error);
         mostrarNotificacion('Error al cargar categorías', 'error');
     }
 }
@@ -520,7 +602,7 @@ async function cargarCategorias() {
 function renderizarTablaCategorias() {
     const tbody = document.getElementById('tbodyCategorias');
     tbody.innerHTML = '';
-    
+
     categorias.forEach(categoria => {
         const row = document.createElement('tr');
         row.innerHTML = `
@@ -540,7 +622,7 @@ function renderizarTablaCategorias() {
 function mostrarModalCategoria(categoria = null) {
     const modal = document.getElementById('modalCategoria');
     const titulo = document.getElementById('tituloModalCategoria');
-    
+
     if (categoria) {
         titulo.textContent = 'Editar Categoría';
         document.getElementById('nombreCategoria').value = categoria.nombre;
@@ -549,35 +631,29 @@ function mostrarModalCategoria(categoria = null) {
         titulo.textContent = 'Nueva Categoría';
         document.getElementById('formCategoria').reset();
     }
-    
+
     modal.style.display = 'block';
 }
 
 async function manejarSubmitCategoria(event) {
     event.preventDefault();
-    
+
     const formData = new FormData(event.target);
     const datosCategoria = {
         nombre: formData.get('nombre'),
         descripcion: formData.get('descripcion')
     };
-    
+
     try {
-        const response = await fetch('/api/categorias', {
+        await apiFetch('/api/categorias', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(datosCategoria)
         });
-        
-        if (response.ok) {
-            mostrarNotificacion('Categoría creada correctamente', 'success');
-            cerrarModal('modalCategoria');
-            cargarCategorias();
-        } else {
-            throw new Error('Error en la respuesta del servidor');
-        }
+
+        mostrarNotificacion('Categoría creada correctamente', 'success');
+        cerrarModal('modalCategoria');
+        cargarCategorias();
     } catch (error) {
-        console.error('Error al guardar categoría:', error);
         mostrarNotificacion('Error al guardar categoría', 'error');
     }
 }
@@ -592,11 +668,9 @@ function editarCategoria(id) {
 // ==================== UBICACIONES ====================
 async function cargarUbicaciones() {
     try {
-        const response = await fetch('/api/ubicaciones');
-        ubicaciones = await response.json();
+        ubicaciones = await apiFetch('/api/ubicaciones');
         renderizarTablaUbicaciones();
     } catch (error) {
-        console.error('Error al cargar ubicaciones:', error);
         mostrarNotificacion('Error al cargar ubicaciones', 'error');
     }
 }
@@ -604,7 +678,7 @@ async function cargarUbicaciones() {
 function renderizarTablaUbicaciones() {
     const tbody = document.getElementById('tbodyUbicaciones');
     tbody.innerHTML = '';
-    
+
     ubicaciones.forEach(ubicacion => {
         const row = document.createElement('tr');
         row.innerHTML = `
@@ -624,7 +698,7 @@ function renderizarTablaUbicaciones() {
 function mostrarModalUbicacion(ubicacion = null) {
     const modal = document.getElementById('modalUbicacion');
     const titulo = document.getElementById('tituloModalUbicacion');
-    
+
     if (ubicacion) {
         titulo.textContent = 'Editar Ubicación';
         document.getElementById('nombreUbicacion').value = ubicacion.nombre;
@@ -633,35 +707,29 @@ function mostrarModalUbicacion(ubicacion = null) {
         titulo.textContent = 'Nueva Ubicación';
         document.getElementById('formUbicacion').reset();
     }
-    
+
     modal.style.display = 'block';
 }
 
 async function manejarSubmitUbicacion(event) {
     event.preventDefault();
-    
+
     const formData = new FormData(event.target);
     const datosUbicacion = {
         nombre: formData.get('nombre'),
         descripcion: formData.get('descripcion')
     };
-    
+
     try {
-        const response = await fetch('/api/ubicaciones', {
+        await apiFetch('/api/ubicaciones', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(datosUbicacion)
         });
-        
-        if (response.ok) {
-            mostrarNotificacion('Ubicación creada correctamente', 'success');
-            cerrarModal('modalUbicacion');
-            cargarUbicaciones();
-        } else {
-            throw new Error('Error en la respuesta del servidor');
-        }
+
+        mostrarNotificacion('Ubicación creada correctamente', 'success');
+        cerrarModal('modalUbicacion');
+        cargarUbicaciones();
     } catch (error) {
-        console.error('Error al guardar ubicación:', error);
         mostrarNotificacion('Error al guardar ubicación', 'error');
     }
 }
@@ -676,11 +744,9 @@ function editarUbicacion(id) {
 // ==================== SALIDAS DE EQUIPOS ====================
 async function cargarSalidas() {
     try {
-        const response = await fetch('/api/salidas');
-        salidas = await response.json();
+        salidas = await apiFetch('/api/salidas');
         renderizarTablaSalidas();
     } catch (error) {
-        console.error('Error al cargar salidas:', error);
         mostrarNotificacion('Error al cargar salidas', 'error');
     }
 }
@@ -688,7 +754,7 @@ async function cargarSalidas() {
 function renderizarTablaSalidas() {
     const tbody = document.getElementById('tbodySalidas');
     tbody.innerHTML = '';
-    
+
     salidas.forEach(salida => {
         const row = document.createElement('tr');
         row.innerHTML = `
@@ -720,7 +786,7 @@ function mostrarModalSalida() {
 function llenarSelectEquiposSalida() {
     const select = document.getElementById('equipo_id');
     select.innerHTML = '<option value="">Seleccionar equipo</option>';
-    
+
     equipos.forEach(equipo => {
         const option = document.createElement('option');
         option.value = equipo.id;
@@ -731,7 +797,7 @@ function llenarSelectEquiposSalida() {
 
 async function manejarSubmitSalida(event) {
     event.preventDefault();
-    
+
     const formData = new FormData(event.target);
     const datosSalida = {
         equipo_id: formData.get('equipo_id'),
@@ -741,24 +807,18 @@ async function manejarSubmitSalida(event) {
         responsable: formData.get('responsable'),
         notas: formData.get('notas')
     };
-    
+
     try {
-        const response = await fetch('/api/salidas', {
+        await apiFetch('/api/salidas', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(datosSalida)
         });
-        
-        if (response.ok) {
-            mostrarNotificacion('Salida registrada correctamente', 'success');
-            cerrarModal('modalSalida');
-            cargarSalidas();
-            cargarEstadisticas();
-        } else {
-            throw new Error('Error en la respuesta del servidor');
-        }
+
+        mostrarNotificacion('Salida registrada correctamente', 'success');
+        cerrarModal('modalSalida');
+        cargarSalidas();
+        cargarEstadisticas();
     } catch (error) {
-        console.error('Error al registrar salida:', error);
         mostrarNotificacion('Error al registrar salida', 'error');
     }
 }
@@ -778,11 +838,9 @@ async function eliminarSalida(id) {
 // ==================== MOVIMIENTOS ====================
 async function cargarMovimientos() {
     try {
-        const response = await fetch('/api/movimientos');
-        movimientos = await response.json();
+        movimientos = await apiFetch('/api/movimientos');
         renderizarTablaMovimientos();
     } catch (error) {
-        console.error('Error al cargar movimientos:', error);
         mostrarNotificacion('Error al cargar movimientos', 'error');
     }
 }
@@ -790,7 +848,7 @@ async function cargarMovimientos() {
 function renderizarTablaMovimientos() {
     const tbody = document.getElementById('tbodyMovimientos');
     tbody.innerHTML = '';
-    
+
     movimientos.forEach(movimiento => {
         const row = document.createElement('tr');
         row.innerHTML = `
@@ -823,20 +881,20 @@ function llenarSelectsMovimiento() {
         option.textContent = `${equipo.codigo} - ${equipo.nombre}`;
         selectEquipo.appendChild(option);
     });
-    
+
     // Llenar selects de ubicaciones
     const selectOrigen = document.getElementById('ubicacion_origen_id');
     const selectDestino = document.getElementById('ubicacion_destino_id');
-    
+
     selectOrigen.innerHTML = '<option value="">Sin origen</option>';
     selectDestino.innerHTML = '<option value="">Sin destino</option>';
-    
+
     ubicaciones.forEach(ubicacion => {
         const optionOrigen = document.createElement('option');
         optionOrigen.value = ubicacion.id;
         optionOrigen.textContent = ubicacion.nombre;
         selectOrigen.appendChild(optionOrigen);
-        
+
         const optionDestino = document.createElement('option');
         optionDestino.value = ubicacion.id;
         optionDestino.textContent = ubicacion.nombre;
@@ -846,7 +904,7 @@ function llenarSelectsMovimiento() {
 
 async function manejarSubmitMovimiento(event) {
     event.preventDefault();
-    
+
     const formData = new FormData(event.target);
     const datosMovimiento = {
         equipo_id: formData.get('equipo_id'),
@@ -856,23 +914,17 @@ async function manejarSubmitMovimiento(event) {
         usuario: formData.get('usuario'),
         notas: formData.get('notas')
     };
-    
+
     try {
-        const response = await fetch('/api/movimientos', {
+        await apiFetch('/api/movimientos', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(datosMovimiento)
         });
-        
-        if (response.ok) {
-            mostrarNotificacion('Movimiento registrado correctamente', 'success');
-            cerrarModal('modalMovimiento');
-            cargarMovimientos();
-        } else {
-            throw new Error('Error en la respuesta del servidor');
-        }
+
+        mostrarNotificacion('Movimiento registrado correctamente', 'success');
+        cerrarModal('modalMovimiento');
+        cargarMovimientos();
     } catch (error) {
-        console.error('Error al registrar movimiento:', error);
         mostrarNotificacion('Error al registrar movimiento', 'error');
     }
 }
@@ -880,9 +932,8 @@ async function manejarSubmitMovimiento(event) {
 // ==================== ESTADÍSTICAS ====================
 async function cargarEstadisticas() {
     try {
-        const response = await fetch('/api/estadisticas');
-        const stats = await response.json();
-        
+        const stats = await apiFetch('/api/estadisticas');
+
         // Actualizar contadores
         document.getElementById('totalEquipos').textContent = stats.totalEquipos;
         document.getElementById('equiposNuevos').textContent = stats.equiposNuevos;
@@ -890,19 +941,19 @@ async function cargarEstadisticas() {
         document.getElementById('equiposBuenEstado').textContent = stats.equiposBuenEstado;
         document.getElementById('equiposMalasCondiciones').textContent = stats.equiposMalasCondiciones;
         document.getElementById('totalSalidas').textContent = stats.totalSalidas;
-        
+
         // Generar gráficos
         generarGraficoTipoDispositivo(stats.equiposPorTipo);
         generarGraficoUbicacion(stats.equiposPorUbicacion);
     } catch (error) {
-        console.error('Error al cargar estadísticas:', error);
+        mostrarNotificacion('Error al cargar estadísticas', 'error');
     }
 }
 
 function generarGraficoTipoDispositivo(datos) {
     const container = document.getElementById('chartTipoDispositivo');
     container.innerHTML = '';
-    
+
     if (datos && datos.length > 0) {
         datos.forEach(item => {
             const bar = document.createElement('div');
@@ -929,7 +980,7 @@ function generarGraficoTipoDispositivo(datos) {
 function generarGraficoUbicacion(datos) {
     const container = document.getElementById('chartUbicacion');
     container.innerHTML = '';
-    
+
     if (datos && datos.length > 0) {
         datos.forEach(item => {
             const bar = document.createElement('div');
@@ -967,7 +1018,7 @@ function generarReporteCategoria() {
         const count = equipos.filter(eq => eq.categoria_id === cat.id).length;
         return `${cat.nombre}: ${count}`;
     }).join('<br>');
-    
+
     container.innerHTML = reporte || 'No hay datos disponibles';
 }
 
@@ -977,7 +1028,7 @@ function generarReporteUbicacion() {
         const count = equipos.filter(eq => eq.ubicacion_id === ub.id).length;
         return `${ub.nombre}: ${count}`;
     }).join('<br>');
-    
+
     container.innerHTML = reporte || 'No hay datos disponibles';
 }
 
@@ -988,14 +1039,14 @@ function generarReporteEstado() {
         const count = equipos.filter(eq => eq.estado === estado).length;
         return `${estado}: ${count}`;
     }).join('<br>');
-    
+
     container.innerHTML = reporte || 'No hay datos disponibles';
 }
 
 function generarReporteSalidas() {
     const container = document.getElementById('reporteSalidas');
     if (salidas.length > 0) {
-        const reporte = salidas.slice(0, 5).map(salida => 
+        const reporte = salidas.slice(0, 5).map(salida =>
             `${salida.equipo_codigo} - ${salida.fecha_salida}: ${salida.motivo}`
         ).join('<br>');
         container.innerHTML = reporte;
@@ -1026,9 +1077,9 @@ function mostrarNotificacion(mensaje, tipo = 'info') {
         animation: slideInRight 0.3s ease;
         max-width: 300px;
     `;
-    
+
     // Estilos según tipo
-    switch(tipo) {
+    switch (tipo) {
         case 'success':
             notificacion.style.background = '#28a745';
             break;
@@ -1042,10 +1093,10 @@ function mostrarNotificacion(mensaje, tipo = 'info') {
         default:
             notificacion.style.background = '#17a2b8';
     }
-    
+
     notificacion.textContent = mensaje;
     document.body.appendChild(notificacion);
-    
+
     // Auto-eliminar después de 3 segundos
     setTimeout(() => {
         notificacion.style.animation = 'slideOutRight 0.3s ease';
@@ -1058,7 +1109,7 @@ function mostrarNotificacion(mensaje, tipo = 'info') {
 }
 
 // Cerrar modales al hacer clic fuera de ellos
-window.onclick = function(event) {
+window.onclick = function (event) {
     if (event.target.classList.contains('modal')) {
         event.target.style.display = 'none';
     }

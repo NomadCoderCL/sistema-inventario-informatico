@@ -2,3 +2,5 @@
 {"level":"info","message":"GET /api/equipos","service":"inventario-api","timestamp":"2026-02-03 20:20:27"}
 {"level":"info","message":"Servidor corriendo en http://localhost:3000","service":"inventario-api","timestamp":"2026-02-03 20:22:40"}
 {"level":"info","message":"GET /api/equipos","service":"inventario-api","timestamp":"2026-02-03 20:23:18"}
+{"level":"info","message":"Servidor corriendo en http://localhost:3000","service":"inventario-api","timestamp":"2026-02-03 20:24:15"}
+{"level":"info","message":"GET /api/equipos","service":"inventario-api","timestamp":"2026-02-03 20:24:27"}
