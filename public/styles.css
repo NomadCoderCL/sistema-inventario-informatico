@@ -94,8 +94,15 @@ body {
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Dashboard */
@@ -418,8 +425,15 @@ body {
 }
 
 @keyframes slideIn {
-    from { transform: translateY(-50px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
 
 .modal-header {
@@ -541,56 +555,56 @@ body {
         margin: 0;
         border-radius: 0;
     }
-    
+
     .header {
         padding: 1.5rem 1rem;
     }
-    
+
     .header h1 {
         font-size: 2rem;
     }
-    
+
     .nav-tabs {
         padding: 0 0.5rem;
     }
-    
+
     .tab-btn {
         padding: 0.75rem 1rem;
         font-size: 0.8rem;
     }
-    
+
     .main-content {
         padding: 1rem;
     }
-    
+
     .stats-grid {
         grid-template-columns: 1fr;
         gap: 1rem;
     }
-    
+
     .charts-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .filters-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .form-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .modal-content {
         width: 95%;
         margin: 2% auto;
     }
-    
+
     .section-header {
         flex-direction: column;
         gap: 1rem;
         align-items: flex-start;
     }
-    
+
     .search-section {
         flex-direction: column;
         align-items: stretch;
@@ -601,33 +615,33 @@ body {
     .header h1 {
         font-size: 1.5rem;
     }
-    
+
     .header p {
         font-size: 1rem;
     }
-    
+
     .tab-btn {
         padding: 0.5rem 0.75rem;
         font-size: 0.75rem;
     }
-    
+
     .btn {
         padding: 0.5rem 1rem;
         font-size: 0.8rem;
     }
-    
+
     .modal-header {
         padding: 1rem;
     }
-    
+
     .modal-header h3 {
         font-size: 1.1rem;
     }
-    
+
     .form-grid {
         padding: 1rem;
     }
-    
+
     .modal-actions {
         padding: 1rem;
         flex-direction: column;
@@ -668,6 +682,7 @@ body {
         opacity: 0;
         transform: translateY(20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -695,8 +710,13 @@ body {
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 /* Login Styles */
@@ -801,4 +821,46 @@ body {
         flex-direction: column;
         gap: 1rem;
     }
+}
+
+/* New Loading States */
+.btn-loading {
+    opacity: 0.7;
+    pointer-events: none;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.loader-sm {
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top: 2px solid #fff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.overlay-loader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.7);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.overlay-loader .loader {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
 }

@@ -4,3 +4,9 @@
 {"level":"info","message":"GET /api/equipos","service":"inventario-api","timestamp":"2026-02-03 20:23:18"}
 {"level":"info","message":"Servidor corriendo en http://localhost:3000","service":"inventario-api","timestamp":"2026-02-03 20:24:15"}
 {"level":"info","message":"GET /api/equipos","service":"inventario-api","timestamp":"2026-02-03 20:24:27"}
+{"level":"info","message":"Servidor corriendo en http://localhost:3000","service":"inventario-api","timestamp":"2026-02-03 20:40:17"}
+{"level":"info","message":"POST /api/auth/login","service":"inventario-api","timestamp":"2026-02-03 20:40:38"}
+{"level":"info","message":"GET /api/equipos","service":"inventario-api","timestamp":"2026-02-03 20:41:24"}
+{"level":"warn","message":"Intento de acceso no autorizado a / - IP: ::1","service":"inventario-api","timestamp":"2026-02-03 20:41:24"}
+{"level":"info","message":"POST /api/auth/login","service":"inventario-api","timestamp":"2026-02-03 20:41:35"}
+{"level":"info","message":"GET /api/equipos","service":"inventario-api","timestamp":"2026-02-03 20:41:35"}
