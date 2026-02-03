@@ -1,0 +1,104 @@
+const equiposService = require('../services/equiposService');
+
+/**
+ * Controlador para manejar peticiones HTTP relacionadas con equipos
+ */
+class EquiposController {
+    /**
+     * Obtiene todos los equipos
+     */
+    async getAll(req, res) {
+        try {
+            const equipos = await equiposService.getAll();
+            res.json(equipos);
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    }
+
+    /**
+     * Obtiene un equipo por su ID
+     */
+    async getById(req, res) {
+        try {
+            const equipo = await equiposService.getById(req.params.id);
+            if (!equipo) {
+                return res.status(404).json({ error: 'Equipo no encontrado' });
+            }
+            res.json(equipo);
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    }
+
+    /**
+     * Crea un nuevo equipo
+     */
+    async create(req, res) {
+        try {
+            const result = await equiposService.create(req.body);
+            res.status(201).json({
+                id: result.id,
+                message: 'Equipo creado exitosamente'
+            });
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    }
+
+    /**
+     * Actualiza un equipo existente
+     */
+    async update(req, res) {
+        try {
+            const result = await equiposService.update(req.params.id, req.body);
+            if (result.changes === 0) {
+                return res.status(404).json({ error: 'Equipo no encontrado' });
+            }
+            res.json({ message: 'Equipo actualizado exitosamente' });
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    }
+
+    /**
+     * Elimina un equipo
+     */
+    async delete(req, res) {
+        try {
+            const result = await equiposService.delete(req.params.id);
+            if (result.changes === 0) {
+                return res.status(404).json({ error: 'Equipo no encontrado' });
+            }
+            res.json({ message: 'Equipo eliminado exitosamente' });
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    }
+
+    /**
+     * Busca equipos por término general
+     */
+    async search(req, res) {
+        try {
+            const equipos = await equiposService.search(req.params.termino);
+            res.json(equipos);
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    }
+
+    /**
+     * Filtra equipos por múltiples criterios
+     */
+    async filter(req, res) {
+        try {
+            const equipos = await equiposService.filter(req.query);
+            res.json(equipos);
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    }
+}
+
+module.exports = new EquiposController();
