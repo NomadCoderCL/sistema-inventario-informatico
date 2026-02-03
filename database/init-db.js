@@ -1,7 +1,8 @@
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const bcrypt = require('bcryptjs');
-const dbPath = path.join(__dirname, 'inventario.db');
+require('dotenv').config();
+const dbPath = path.resolve(__dirname, '..', 'inventario.db');
 const db = new sqlite3.Database(dbPath);
 
 // Función para hashear contraseñas
