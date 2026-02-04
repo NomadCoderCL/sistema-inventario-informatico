@@ -3,6 +3,11 @@ import { cerrarModal, mostrarNotificacion } from './utils.js';
 
 // ==================== RENDERIZADO DE TABLAS ====================
 
+/**
+ * Renderiza la tabla de equipos en el DOM
+ * @param {Function} onEdit - Callback para editar
+ * @param {Function} onDelete - Callback para eliminar
+ */
 export function renderizarTablaEquipos(onEdit, onDelete) {
     const tbody = document.getElementById('tbodyEquipos');
     tbody.innerHTML = '';
@@ -37,6 +42,9 @@ export function renderizarTablaEquipos(onEdit, onDelete) {
     });
 }
 
+/**
+ * Renderiza la tabla de marcas
+ */
 export function renderizarTablaMarcas(onEdit, onToggle) {
     const tbody = document.getElementById('tbodyMarcas');
     tbody.innerHTML = '';
@@ -163,6 +171,9 @@ export function renderizarTablaMovimientos() {
 
 // ==================== MODALES Y SELECTS ====================
 
+/**
+ * Llena los selectores de filtros en la sección de búsqueda
+ */
 export function llenarSelectsFiltros() {
     const filtroMarca = document.getElementById('filtroMarca');
     const filtroCategoria = document.getElementById('filtroCategoria');
@@ -195,6 +206,10 @@ export function llenarSelectsFiltros() {
     });
 }
 
+/**
+ * Muestra el modal para crear o editar un equipo
+ * @param {Object|null} equipo - Datos del equipo a editar o null para nuevo
+ */
 export function mostrarModalEquipo(equipo = null) {
     state.equipoEditando = equipo;
     const modal = document.getElementById('modalEquipo');
@@ -368,6 +383,9 @@ function llenarSelectsMovimiento() {
 
 // ==================== GRÁFICOS Y REPORTES ====================
 
+/**
+ * Genera visualización simple de barras para tipos de dispositivo
+ */
 export function generarGraficoTipoDispositivo(datos) {
     const container = document.getElementById('chartTipoDispositivo');
     container.innerHTML = '';

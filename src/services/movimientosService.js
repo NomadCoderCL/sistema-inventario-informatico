@@ -1,6 +1,13 @@
 const { query, run } = require('../models/db');
 
+/**
+ * Servicio para registrar y recuperar la trazabilidad de los equipos
+ */
 class MovimientosService {
+    /**
+     * Obtiene todos los movimientos registrados con detalles de equipo y ubicación
+     * @returns {Promise<Array>}
+     */
     async getAll() {
         const sql = `
             SELECT m.*, e.codigo as equipo_codigo, e.nombre as equipo_nombre,
@@ -14,6 +21,11 @@ class MovimientosService {
         return await query(sql);
     }
 
+    /**
+     * Registra un nuevo evento en el historial
+     * @param {Object} data - Datos del movimiento
+     * @returns {Promise<Object>}
+     */
     async create(data) {
         const { equipo_id, tipo_movimiento, ubicacion_origen_id, ubicacion_destino_id, usuario, notas } = data;
         const sql = 'INSERT INTO historial_movimientos (equipo_id, tipo_movimiento, ubicacion_origen_id, ubicacion_destino_id, usuario, notas) VALUES (?, ?, ?, ?, ?, ?)';

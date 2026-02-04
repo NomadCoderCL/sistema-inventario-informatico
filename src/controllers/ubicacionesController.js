@@ -1,6 +1,12 @@
 const ubicacionesService = require('../services/ubicacionesService');
 
+/**
+ * Controlador para la gestión de ubicaciones físicas
+ */
 class UbicacionesController {
+    /**
+     * Lista todas las ubicaciones registradas
+     */
     async getAll(req, res) {
         try {
             const ubicaciones = await ubicacionesService.getAll();

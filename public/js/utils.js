@@ -1,11 +1,20 @@
 import { state } from './state.js';
 
+/**
+ * Cierra un modal por su ID y limpia el estado de edición
+ * @param {string} modalId - ID del elemento modal en el DOM
+ */
 export function cerrarModal(modalId) {
     document.getElementById(modalId).style.display = 'none';
     state.equipoEditando = null;
     state.marcaEditando = null;
 }
 
+/**
+ * Muestra una notificación flotante temporal
+ * @param {string} mensaje - Texto a mostrar
+ * @param {'success'|'error'|'warning'|'info'} tipo - Estilo de la notificación
+ */
 export function mostrarNotificacion(mensaje, tipo = 'info') {
     const notificacion = document.createElement('div');
     notificacion.style.cssText = `
@@ -49,6 +58,10 @@ export function mostrarNotificacion(mensaje, tipo = 'info') {
     }, 3000);
 }
 
+/**
+ * Muestra un overlay de carga que bloquea la interacción
+ * @param {string} mensaje - Mensaje informativo del proceso
+ */
 export function showOverlay(mensaje = 'Cargando...') {
     let overlay = document.getElementById('global-overlay');
     if (!overlay) {
@@ -66,6 +79,9 @@ export function showOverlay(mensaje = 'Cargando...') {
     }
 }
 
+/**
+ * Oculta el overlay de carga global
+ */
 export function hideOverlay() {
     const overlay = document.getElementById('global-overlay');
     if (overlay) overlay.style.display = 'none';

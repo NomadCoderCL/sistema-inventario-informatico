@@ -1,6 +1,12 @@
 const movimientosService = require('../services/movimientosService');
 
+/**
+ * Controlador para la bitácora de movimientos de hardware
+ */
 class MovimientosController {
+    /**
+     * Obtiene el historial completo de movimientos
+     */
     async getAll(req, res) {
         try {
             const movimientos = await movimientosService.getAll();
@@ -10,6 +16,9 @@ class MovimientosController {
         }
     }
 
+    /**
+     * Registra un nuevo movimiento de equipo
+     */
     async create(req, res) {
         try {
             const result = await movimientosService.create(req.body);

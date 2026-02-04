@@ -1,6 +1,12 @@
 import { state } from './state.js';
 import { handleLogout } from './auth.js';
 
+/**
+ * Wrapper universal para peticiones Fetch con autenticación JWT
+ * @param {string} url - Endpoint de la API
+ * @param {Object} options - Opciones nativas de Fetch
+ * @returns {Promise<any>}
+ */
 export async function apiFetch(url, options = {}) {
     if (!state.authToken) {
         handleLogout();
@@ -34,7 +40,9 @@ export async function apiFetch(url, options = {}) {
     }
 }
 
-// Equipos
+/**
+ * API para gestión de equipos
+ */
 export const equipoApi = {
     getAll: () => apiFetch('/api/equipos'),
     search: (termino) => apiFetch(`/api/equipos/buscar/${termino}`),
@@ -45,14 +53,18 @@ export const equipoApi = {
     delete: (id) => apiFetch(`/api/equipos/${id}`, { method: 'DELETE' })
 };
 
-// Marcas
+/**
+ * API para gestión de marcas
+ */
 export const marcaApi = {
     getAll: () => apiFetch('/api/marcas/todas'),
     create: (data) => apiFetch('/api/marcas', { method: 'POST', body: JSON.stringify(data) }),
     update: (id, data) => apiFetch(`/api/marcas/${id}`, { method: 'PUT', body: JSON.stringify(data) })
 };
 
-// Categorías
+/**
+ * API para categorías de productos
+ */
 export const categoriaApi = {
     getAll: () => apiFetch('/api/categorias'),
     create: (data) => apiFetch('/api/categorias', { method: 'POST', body: JSON.stringify(data) })

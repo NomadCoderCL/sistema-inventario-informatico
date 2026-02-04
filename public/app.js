@@ -11,12 +11,20 @@ import {
 } from './js/ui.js';
 import { cerrarModal, mostrarNotificacion, showOverlay, hideOverlay } from './js/utils.js';
 
+/**
+ * Orquestador principal de la aplicación.
+ * Maneja la inicialización, eventos globales y coordinación entre módulos de API y UI.
+ */
+
 // Inicialización del sistema
 document.addEventListener('DOMContentLoaded', function () {
     checkAuth(inicializarSistema);
     configurarEventosGlobales();
 });
 
+/**
+ * Carga inicial de todos los datos necesarios para el funcionamiento de la app
+ */
 async function inicializarSistema() {
     showOverlay('Cargando sistema...');
     try {
@@ -39,6 +47,9 @@ async function inicializarSistema() {
     }
 }
 
+/**
+ * Registra todos los escuchadores de eventos para formularios, botones y navegación
+ */
 function configurarEventosGlobales() {
     // Evento de login
     document.getElementById('login-form').onsubmit = (e) => handleLogin(e, inicializarSistema);
@@ -114,6 +125,11 @@ function setupClick(selector, callback) {
 
 // ==================== LÓGICA DE ORQUESTACIÓN ====================
 
+/**
+ * Maneja la navegación entre secciones de la SPA
+ * @param {string} tabId - ID de la sección a mostrar
+ * @param {HTMLElement} btnElement - Botón que disparó el evento
+ */
 function cambiarTab(tabId, btnElement) {
     document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -127,6 +143,10 @@ function cambiarTab(tabId, btnElement) {
 }
 
 // --- EQUIPOS ---
+
+/**
+ * Refresca la lista de equipos desde el servidor y actualiza la tabla
+ */
 async function cargarEquipos() {
     try {
         state.equipos = await equipoApi.getAll();

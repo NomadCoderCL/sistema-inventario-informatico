@@ -1,6 +1,12 @@
 const marcasService = require('../services/marcasService');
 
+/**
+ * Controlador para la gestión de marcas de fabricantes
+ */
 class MarcasController {
+    /**
+     * Obtiene solo las marcas activas (no obsoletas)
+     */
     async getAll(req, res) {
         try {
             const marcas = await marcasService.getAll(true);
@@ -10,6 +16,9 @@ class MarcasController {
         }
     }
 
+    /**
+     * Obtiene todas las marcas incluyendo las obsoletas
+     */
     async getAllComplete(req, res) {
         try {
             const marcas = await marcasService.getAll(false);
@@ -19,6 +28,9 @@ class MarcasController {
         }
     }
 
+    /**
+     * Registra una nueva marca
+     */
     async create(req, res) {
         try {
             const result = await marcasService.create(req.body);
@@ -28,6 +40,9 @@ class MarcasController {
         }
     }
 
+    /**
+     * Actualiza la información de una marca existente
+     */
     async update(req, res) {
         try {
             const result = await marcasService.update(req.params.id, req.body);

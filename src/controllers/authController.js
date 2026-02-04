@@ -3,8 +3,18 @@ const bcrypt = require('bcryptjs');
 const Usuario = require('../models/Usuario');
 const { JWT_SECRET = 'tu_clave_secreta' } = process.env;
 
+/**
+ * Controlador para la gestión de autenticación y sesiones
+ */
 class AuthController {
-    // Iniciar sesión
+    /**
+     * Procesa el inicio de sesión del usuario
+     * @param {Object} req - Objeto de petición Express
+     * @param {Object} req.body - Cuerpo de la petición
+     * @param {string} req.body.username - Nombre de usuario
+     * @param {string} req.body.password - Contraseña
+     * @param {Object} res - Objeto de respuesta Express
+     */
     static async login(req, res) {
         try {
             const { username, password } = req.body;
@@ -82,7 +92,12 @@ class AuthController {
         }
     }
 
-    // Verificar token
+    /**
+     * Verifica la validez de un token JWT
+     * @param {Object} req - Objeto de petición Express
+     * @param {Object} req.headers - Cabeceras de la petición (requiere Authorization: Bearer <token>)
+     * @param {Object} res - Objeto de respuesta Express
+     */
     static async verifyToken(req, res) {
         try {
             const token = req.headers.authorization?.split(' ')[1];

@@ -1,6 +1,13 @@
 const { query, get } = require('../models/db');
 
+/**
+ * Servicio para recopilar datos métricos de todo el sistema
+ */
 class EstadisticasService {
+    /**
+     * Calcula y agrupa todas las estadísticas para el Dashboard
+     * @returns {Promise<Object>} Objeto con contadores y agrupaciones
+     */
     async getGlobalStats() {
         const stats = {};
 
