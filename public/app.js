@@ -341,7 +341,16 @@ async function manejarSubmitSalida(e) {
 }
 
 async function eliminarSalida(id) {
-    mostrarNotificacion('Funcionalidad de eliminación no implementada en backend', 'warning');
+    if (confirm('¿Está seguro de que desea eliminar este registro de salida?')) {
+        showOverlay('Eliminando registro...');
+        try {
+            await salidaApi.delete(id);
+            mostrarNotificacion('Registro de salida eliminado', 'success');
+            await cargarSalidas();
+            await cargarEstadisticas();
+        } catch (e) { mostrarNotificacion('Error al eliminar registro', 'error'); }
+        finally { hideOverlay(); }
+    }
 }
 
 // --- MOVIMIENTOS ---

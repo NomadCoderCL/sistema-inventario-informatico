@@ -29,6 +29,15 @@ class SalidasService {
         const sql = 'INSERT INTO salidas_equipos (equipo_id, fecha_salida, motivo, destino, responsable, notas) VALUES (?, ?, ?, ?, ?, ?)';
         return await run(sql, [equipo_id, fecha_salida, motivo, destino, responsable, notas]);
     }
+
+    /**
+     * Elimina un registro de salida
+     * @param {number} id - ID de la salida
+     * @returns {Promise<Object>}
+     */
+    async delete(id) {
+        return await run('DELETE FROM salidas_equipos WHERE id = ?', [id]);
+    }
 }
 
 module.exports = new SalidasService();

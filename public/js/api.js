@@ -79,7 +79,8 @@ export const ubicacionApi = {
 // Salidas
 export const salidaApi = {
     getAll: () => apiFetch('/api/salidas'),
-    create: (data) => apiFetch('/api/salidas', { method: 'POST', body: JSON.stringify(data) })
+    create: (data) => apiFetch('/api/salidas', { method: 'POST', body: JSON.stringify(data) }),
+    delete: (id) => apiFetch(`/api/salidas/${id}`, { method: 'DELETE' })
 };
 
 // Movimientos

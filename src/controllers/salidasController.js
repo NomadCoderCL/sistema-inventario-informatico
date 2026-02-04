@@ -27,6 +27,21 @@ class SalidasController {
             res.status(500).json({ error: error.message });
         }
     }
+
+    /**
+     * Elimina una salida registrada
+     */
+    async delete(req, res) {
+        try {
+            const result = await salidasService.delete(req.params.id);
+            if (result.changes === 0) {
+                return res.status(404).json({ error: 'Salida no encontrada' });
+            }
+            res.json({ message: 'Salida eliminada exitosamente' });
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    }
 }
 
 module.exports = new SalidasController();
