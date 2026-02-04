@@ -2,7 +2,7 @@
 
 Todas las peticiones a la API (excepto `/api/auth/login`) requieren el encabezado `Authorization: Bearer <JWT_TOKEN>`.
 
-## 🔐 Autenticación
+## Autenticación
 
 ### POST `/api/auth/login`
 Inicia sesión y obtiene el token JWT.
@@ -16,7 +16,7 @@ Valida el token actual.
 
 ---
 
-## 💻 Equipos
+## Equipos
 
 ### GET `/api/equipos`
 Obtiene todos los equipos del inventario.
@@ -34,7 +34,7 @@ Crea un nuevo equipo.
 
 ---
 
-## 🏷️ Marcas, Categorías y Ubicaciones
+## Marcas, Categorías y Ubicaciones
 
 ### GET `/api/marcas/todas`
 Retorna todas las marcas (incluyendo obsoletas).
@@ -47,7 +47,7 @@ Lista todas las ubicaciones.
 
 ---
 
-## 📊 Estadísticas y Otros
+## Estadísticas y Otros
 
 ### GET `/api/estadisticas`
 Obtiene contadores globales y agrupaciones para el Dashboard.

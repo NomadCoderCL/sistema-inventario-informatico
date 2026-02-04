@@ -1,4 +1,4 @@
-# 🖥️ Sistema de Inventario Informático
+# Sistema de Inventario Informático
 
 [![Node.js](https://img.shields.io/badge/Node.js-v18+-339933?logo=nodedotjs&logoColor=white)](https://nodejs.org/)
 [![SQLite](https://img.shields.io/badge/SQLite-3-003B57?logo=sqlite&logoColor=white)](https://www.sqlite.org/)
@@ -10,18 +10,18 @@ Un sistema profesional, moderno y seguro para la gestión integral de activos in
 
 ---
 
-## ✨ Características Principales
+## Características Principales
 
-- 🔐 **Autenticación Robusta**: Sistema de seguridad basado en JWT (JSON Web Tokens) con protección de rutas.
-- 🏗️ **Arquitectura Modular**: Código frontend desacoplado usando ES Modules y backend organizado en Controladores/Servicios.
-- 📊 **Dashboard Estadístico**: Visualización en tiempo real del estado del inventario y distribución de equipos.
-- 📦 **Gestión CRUD Completa**: Control total sobre Equipos, Marcas, Categorías y Ubicaciones.
-- 🔄 **Trazabilidad Total**: Historial detallado de movimientos físicos y bajas (salidas) de inventario.
-- 🚀 **UX Premium**: Interfaz fluida con estados de carga (overlays), notificaciones animadas y diseño responsivo.
+- **Autenticación Robusta**: Sistema de seguridad basado en JWT (JSON Web Tokens) con protección de rutas.
+- **Arquitectura Modular**: Código frontend desacoplado usando ES Modules y backend organizado en Controladores/Servicios.
+- **Dashboard Estadístico**: Visualización en tiempo real del estado del inventario y distribución de equipos.
+- **Gestión CRUD Completa**: Control total sobre Equipos, Marcas, Categorías y Ubicaciones.
+- **Trazabilidad Total**: Historial detallado de movimientos físicos y bajas (salidas) de inventario.
+- **UX Premium**: Interfaz fluida con estados de carga (overlays), notificaciones animadas y diseño responsivo.
 
 ---
 
-## 🛠️ Stack Tecnológico
+## Stack Tecnológico
 
 ### Backend
 - **Core**: [Node.js](https://nodejs.org/) con [Express](https://expressjs.com/)
@@ -35,7 +35,7 @@ Un sistema profesional, moderno y seguro para la gestión integral de activos in
 
 ---
 
-## 📐 Arquitectura del Sistema
+## Arquitectura del Sistema
 
 ```mermaid
 graph TD
@@ -65,7 +65,7 @@ graph TD
 
 ---
 
-## 🚀 Instalación y Uso
+## Instalación y Uso
 
 ### Requisitos Previos
 - Node.js v18 o superior instalado.
@@ -99,23 +99,23 @@ El sistema estará disponible en `http://localhost:3000`.
 
 ---
 
-## 🔒 Seguridad
+## Seguridad
 - Todas las contraseñas se almacenan mediante **hashing con Salt** (bcrypt).
 - La API está protegida y requiere un **Bearer Token** legítimo.
 - Se implementa protección básica contra inyecciones SQL mediante el uso de parámetros en las queries.
 
-## 💾 Gestión de Datos
+## Gestión de Datos
 - **Backups**: El sistema genera un respaldo automático del archivo `.db` en el directorio raíz antes de realizar inicializaciones críticas.
 - **Documentación de DB**: Puedes encontrar el esquema detallado en [DATABASE.md](./database/DATABASE.md).
 
 ---
 
-## 🎨 Capturas de Pantalla
+## Capturas de Pantalla
 *(Próximamente: Agregue capturas de pantalla de su dashboard y listado de equipos aquí)*
 
 ---
 
-## 👨‍💻 Autor
+## Autor
 **NomadCoderCL**
 - LinkedIn: [Su Perfil]
 - Portfolio: [URL de su portfolio]
