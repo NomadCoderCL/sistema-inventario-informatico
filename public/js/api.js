@@ -33,7 +33,8 @@ export async function apiFetch(url, options = {}) {
             throw new Error(result.message || 'Error en la petición');
         }
 
-        return result;
+        // Si la respuesta tiene el formato estándar { success, data }, devolver solo data
+        return result.data !== undefined ? result.data : result;
     } catch (error) {
         console.error(`Error en apiFetch (${url}):`, error);
         throw error;

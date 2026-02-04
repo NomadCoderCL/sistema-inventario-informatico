@@ -10,9 +10,9 @@ class SalidasController {
     async getAll(req, res) {
         try {
             const salidas = await salidasService.getAll();
-            res.json(salidas);
+            res.json({ success: true, data: salidas });
         } catch (error) {
-            res.status(500).json({ error: error.message });
+            res.status(500).json({ success: false, message: error.message });
         }
     }
 
@@ -22,9 +22,13 @@ class SalidasController {
     async create(req, res) {
         try {
             const result = await salidasService.create(req.body);
-            res.json({ id: result.id, message: 'Salida registrada exitosamente' });
+            res.status(201).json({
+                success: true,
+                message: 'Salida registrada exitosamente',
+                data: { id: result.id }
+            });
         } catch (error) {
-            res.status(500).json({ error: error.message });
+            res.status(500).json({ success: false, message: error.message });
         }
     }
 
@@ -35,11 +39,14 @@ class SalidasController {
         try {
             const result = await salidasService.delete(req.params.id);
             if (result.changes === 0) {
-                return res.status(404).json({ error: 'Salida no encontrada' });
+                return res.status(404).json({ success: false, message: 'Salida no encontrada' });
             }
-            res.json({ message: 'Salida eliminada exitosamente' });
+            res.json({
+                success: true,
+                message: 'Salida eliminada exitosamente'
+            });
         } catch (error) {
-            res.status(500).json({ error: error.message });
+            res.status(500).json({ success: false, message: error.message });
         }
     }
 }

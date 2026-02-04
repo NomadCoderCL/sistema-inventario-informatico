@@ -53,6 +53,11 @@ app.get('/', (req, res) => {
 // Manejo centralizado de errores
 app.use(errorHandler);
 
-app.listen(PORT, () => {
-    logger.info(`Servidor corriendo en http://localhost:${PORT}`);
-});
+// Solo escuchar si se ejecuta directamente (no en tests)
+if (process.env.NODE_ENV !== 'test') {
+    app.listen(PORT, () => {
+        logger.info(`Servidor corriendo en http://localhost:${PORT}`);
+    });
+}
+
+module.exports = app;

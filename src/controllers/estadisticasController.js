@@ -10,9 +10,9 @@ class EstadisticasController {
     async getStats(req, res) {
         try {
             const stats = await estadisticasService.getGlobalStats();
-            res.json(stats);
+            res.json({ success: true, data: stats });
         } catch (error) {
-            res.status(500).json({ error: error.message });
+            res.status(500).json({ success: false, message: error.message });
         }
     }
 }

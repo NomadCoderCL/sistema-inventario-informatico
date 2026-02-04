@@ -10,9 +10,12 @@ class EquiposController {
     async getAll(req, res) {
         try {
             const equipos = await equiposService.getAll();
-            res.json(equipos);
+            res.json({
+                success: true,
+                data: equipos
+            });
         } catch (error) {
-            res.status(500).json({ error: error.message });
+            res.status(500).json({ success: false, message: error.message });
         }
     }
 
@@ -23,11 +26,14 @@ class EquiposController {
         try {
             const equipo = await equiposService.getById(req.params.id);
             if (!equipo) {
-                return res.status(404).json({ error: 'Equipo no encontrado' });
+                return res.status(404).json({ success: false, message: 'Equipo no encontrado' });
             }
-            res.json(equipo);
+            res.json({
+                success: true,
+                data: equipo
+            });
         } catch (error) {
-            res.status(500).json({ error: error.message });
+            res.status(500).json({ success: false, message: error.message });
         }
     }
 
@@ -38,11 +44,12 @@ class EquiposController {
         try {
             const result = await equiposService.create(req.body);
             res.status(201).json({
-                id: result.id,
-                message: 'Equipo creado exitosamente'
+                success: true,
+                message: 'Equipo creado exitosamente',
+                data: { id: result.id }
             });
         } catch (error) {
-            res.status(500).json({ error: error.message });
+            res.status(500).json({ success: false, message: error.message });
         }
     }
 
@@ -53,11 +60,14 @@ class EquiposController {
         try {
             const result = await equiposService.update(req.params.id, req.body);
             if (result.changes === 0) {
-                return res.status(404).json({ error: 'Equipo no encontrado' });
+                return res.status(404).json({ success: false, message: 'Equipo no encontrado' });
             }
-            res.json({ message: 'Equipo actualizado exitosamente' });
+            res.json({
+                success: true,
+                message: 'Equipo actualizado exitosamente'
+            });
         } catch (error) {
-            res.status(500).json({ error: error.message });
+            res.status(500).json({ success: false, message: error.message });
         }
     }
 
@@ -68,11 +78,14 @@ class EquiposController {
         try {
             const result = await equiposService.delete(req.params.id);
             if (result.changes === 0) {
-                return res.status(404).json({ error: 'Equipo no encontrado' });
+                return res.status(404).json({ success: false, message: 'Equipo no encontrado' });
             }
-            res.json({ message: 'Equipo eliminado exitosamente' });
+            res.json({
+                success: true,
+                message: 'Equipo eliminado exitosamente'
+            });
         } catch (error) {
-            res.status(500).json({ error: error.message });
+            res.status(500).json({ success: false, message: error.message });
         }
     }
 
@@ -82,9 +95,12 @@ class EquiposController {
     async search(req, res) {
         try {
             const equipos = await equiposService.search(req.params.termino);
-            res.json(equipos);
+            res.json({
+                success: true,
+                data: equipos
+            });
         } catch (error) {
-            res.status(500).json({ error: error.message });
+            res.status(500).json({ success: false, message: error.message });
         }
     }
 
@@ -94,9 +110,12 @@ class EquiposController {
     async filter(req, res) {
         try {
             const equipos = await equiposService.filter(req.query);
-            res.json(equipos);
+            res.json({
+                success: true,
+                data: equipos
+            });
         } catch (error) {
-            res.status(500).json({ error: error.message });
+            res.status(500).json({ success: false, message: error.message });
         }
     }
 }

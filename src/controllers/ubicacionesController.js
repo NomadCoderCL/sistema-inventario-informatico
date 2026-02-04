@@ -10,9 +10,9 @@ class UbicacionesController {
     async getAll(req, res) {
         try {
             const ubicaciones = await ubicacionesService.getAll();
-            res.json(ubicaciones);
+            res.json({ success: true, data: ubicaciones });
         } catch (error) {
-            res.status(500).json({ error: error.message });
+            res.status(500).json({ success: false, message: error.message });
         }
     }
 }

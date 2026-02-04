@@ -10,9 +10,9 @@ class MarcasController {
     async getAll(req, res) {
         try {
             const marcas = await marcasService.getAll(true);
-            res.json(marcas);
+            res.json({ success: true, data: marcas });
         } catch (error) {
-            res.status(500).json({ error: error.message });
+            res.status(500).json({ success: false, message: error.message });
         }
     }
 
@@ -22,9 +22,9 @@ class MarcasController {
     async getAllComplete(req, res) {
         try {
             const marcas = await marcasService.getAll(false);
-            res.json(marcas);
+            res.json({ success: true, data: marcas });
         } catch (error) {
-            res.status(500).json({ error: error.message });
+            res.status(500).json({ success: false, message: error.message });
         }
     }
 
@@ -34,9 +34,13 @@ class MarcasController {
     async create(req, res) {
         try {
             const result = await marcasService.create(req.body);
-            res.json({ id: result.id, message: 'Marca creada exitosamente' });
+            res.status(201).json({
+                success: true,
+                message: 'Marca creada exitosamente',
+                data: { id: result.id }
+            });
         } catch (error) {
-            res.status(500).json({ error: error.message });
+            res.status(500).json({ success: false, message: error.message });
         }
     }
 
@@ -47,11 +51,14 @@ class MarcasController {
         try {
             const result = await marcasService.update(req.params.id, req.body);
             if (result.changes === 0) {
-                return res.status(404).json({ error: 'Marca no encontrada' });
+                return res.status(404).json({ success: false, message: 'Marca no encontrada' });
             }
-            res.json({ message: 'Marca actualizada exitosamente' });
+            res.json({
+                success: true,
+                message: 'Marca actualizada exitosamente'
+            });
         } catch (error) {
-            res.status(500).json({ error: error.message });
+            res.status(500).json({ success: false, message: error.message });
         }
     }
 }
